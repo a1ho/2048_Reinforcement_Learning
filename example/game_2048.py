@@ -10,10 +10,13 @@ class Game2048:
         self._add_new_tile()
 
     def _add_new_tile(self):
-        empty_cells = list(zip(*np.where(self.board == 0)))
+        empty_cells = [(i, j) for i in range(self.size) for j in range(self.size) if self.board[i, j]==0]
         if empty_cells:
             row, col = random.choice(empty_cells)
-            self.board[row][col] = 2 if random.random() < 0.9 else 4
+            if random.random() < 0.9:
+                self.board[row][col] = 2 
+            else:
+                self.board[row][col] = 4
 
     def _merge(self, row):
         non_zero = row[row != 0]
@@ -41,13 +44,13 @@ class Game2048:
 
     def step(self, action):
         original_board = np.copy(self.board)
-        if action == 0:  # Up
+        if action == 0:  # up
             self.board = self._move(self.board.T).T
-        elif action == 1:  # Down
-            self.board = np.flipud(self._move(np.flipud(self.board.T))).T
-        elif action == 2:  # Left
+        elif action == 1:  # down
+            self.board = np.flipud(self._move(np.flipud(self.board).T).T)
+        elif action == 2:  # left
             self.board = self._move(self.board)
-        elif action == 3:  # Right
+        elif action == 3:  # right
             self.board = np.fliplr(self._move(np.fliplr(self.board)))
         
         if not np.array_equal(original_board, self.board):
