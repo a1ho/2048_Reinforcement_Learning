@@ -43,17 +43,17 @@ class CustomCNN(BaseFeaturesExtractor):
         observations = observations.permute(0, 3, 1, 2)
         return self.linear(self.cnn(observations))
 
-policy_kwargs = dict(
-    features_extractor_class=CustomCNN,
-    features_extractor_kwargs=dict(features_dim=256),
-)
 # policy_kwargs = dict(
-#     net_arch=[256, 256, 256, 256],  # Two hidden layers with 256 units each
-#     activation_fn=torch.nn.ReLU  # Activation function for the hidden layers
+#     features_extractor_class=CustomCNN,
+#     features_extractor_kwargs=dict(features_dim=256),
 # )
+policy_kwargs = dict(
+    net_arch=[256, 256, 256, 256],  # Two hidden layers with 256 units each
+    activation_fn=torch.nn.ReLU  # Activation function for the hidden layers
+)
 # Create the DQN model
 model = DQN(
-    'CnnPolicy',
+    'MlpPolicy',
     env,
     policy_kwargs=policy_kwargs,
     verbose=1,
@@ -101,7 +101,7 @@ model = DQN(
 #     scores.append(env.game.score)
 # print(f'\nAverage Score with Baseline Model: {np.mean(scores)}')
 
-model.learn(total_timesteps=100000, log_interval=100)
+model.learn(total_timesteps=500000, log_interval=100)
 model.save("dqn_2048")
 
 print('DQN Model: \n')
