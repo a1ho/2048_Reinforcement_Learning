@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from game_2048 import Game2048
 
+
 class Game2048Env(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
@@ -16,13 +17,30 @@ class Game2048Env(gym.Env):
         self.observation_space = spaces.Box(low=0, high=2**16, shape=(4, 4), dtype=np.int64)
 
         self.fig, self.ax = plt.subplots()
+        self.tile_colors = {
+            0: (204, 192, 179),
+            2: (238, 228, 218),
+            4: (237, 224, 200),
+            8: (242, 177, 121),
+            16: (245, 149, 99),
+            32: (246, 124, 95),
+            64: (246, 94, 59),
+            128: (237, 207, 114),
+            256: (237, 204, 97),
+            512: (237, 200, 80),
+            1024: (237, 197, 63),
+            2048: (237, 194, 46),
+        }
+
 
     def step(self, action):
-        observation, reward, done = self.game.step(action)
+        observation, reward, terminated = self.game.step(action)
+        truncated = False
         info = {}
-        return observation, reward, done, info
+        return observation, reward, terminated, truncated, info
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
         return self.game.reset()
 
     def render(self, mode='human'):
@@ -30,14 +48,42 @@ class Game2048Env(gym.Env):
             self.game.render()
         elif mode == 'rgb_array':
             self.ax.clear()
-            self.ax.imshow(self.get_rgb_array())
+            rgb_array = self.get_rgb_array()
+            self.ax.imshow(rgb_array)
+            self.ax.set_xticks([])
+            self.ax.set_yticks([])
+            self.ax.set_xticklabels([])
+            self.ax.set_yticklabels([])
+
+            # Add borders and text annotations for each tile
+            for i in range(4):
+                for j in range(4):
+                    value = self.game.board[i, j]
+                    # Draw the border
+                    rect = plt.Rectangle((j - 0.5, i - 0.5), 1, 1, linewidth=1, edgecolor='lightgrey', facecolor='none')
+                    self.ax.add_patch(rect)
+                    if value != 0:
+                        # Adjust text color based on the tile value for better visibility
+                        text_color = 'white' if value >= 8 else 'black'
+                        self.ax.text(j, i, str(value), ha='center', va='center', color=text_color, fontsize=12, fontweight='bold')
+            self.ax.text(0, -0.5, f'Move count: {self.game.n_moves}', ha='left', va='center', fontsize=12, fontweight='bold', color='black')
+
             plt.draw()
-            plt.pause(0.01)
+            plt.pause(0.1)
+            return rgb_array
 
     def get_rgb_array(self):
-        colormap = plt.get_cmap('viridis')
-        norm = mcolors.Normalize(vmin=0, vmax=2**16)
-        return colormap(norm(self.game.board))
+        board_rgb = np.zeros((4, 4, 3), dtype=np.uint8)
+        for i in range(4):
+            for j in range(4):
+                value = self.game.board[i, j]
+                if value in self.tile_colors:
+                    board_rgb[i, j] = self.tile_colors[value]
+                else:
+                    # Fallback color for values not in the colormap
+                    board_rgb[i, j] = (0, 0, 0)
+        return board_rgb
+
 
     def close(self):
         plt.close(self.fig)
