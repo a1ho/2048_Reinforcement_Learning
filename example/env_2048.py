@@ -14,8 +14,7 @@ class Game2048Env(gym.Env):
         self.game = Game2048()
         
         self.action_space = spaces.Discrete(4)  # Four possible actions: up, down, left, right
-        self.observation_space = spaces.Box(low=0, high=2**16, shape=(4, 4), dtype=np.int64)
-
+        self.observation_space = spaces.Box(low=0, high=1, shape=(4, 4, 11), dtype=np.float32)
         self.fig, self.ax = plt.subplots()
         self.tile_colors = {
             0: (204, 192, 179),
@@ -37,11 +36,25 @@ class Game2048Env(gym.Env):
         observation, reward, terminated = self.game.step(action)
         truncated = False
         info = {}
+        observation = self._convert_to_3d(observation)
         return observation, reward, terminated, truncated, info
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        return self.game.reset()
+        observation, _ = self.game.reset()
+        return self._convert_to_3d(observation), {}
+
+    def _convert_to_3d(self, board):
+        one_hot_encoded = np.zeros((4, 4, 11), dtype=np.float32)
+        for i in range(4):
+            for j in range(4):
+                value = board[i, j]
+                if value == 0:
+                    one_hot_encoded[i, j, 0] = 1
+                else:
+                    index = int(np.log2(value))
+                    one_hot_encoded[i, j, index] = 1
+        return one_hot_encoded
 
     def render(self, mode='human'):
         if mode == 'human':

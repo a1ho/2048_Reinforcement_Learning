@@ -80,22 +80,31 @@ class Game2048:
                     action = 0
                 else:
                     found = True
+                    self.reward = 0
             else:
                 found = True
 
         self.score += self.reward
-        
-        self.reward *= self.calculate_bonus(self.board, original_board)
 
-        if action == 0:
-            self.reward *= -10
-        if action == 3 and (0 not in self.board[-1]):
-            self.reward *= -0.5
+
+        # if np.count_nonzero(self.board) <= 12:
+        #     self.reward *= self.calculate_bonus(self.board, original_board)
+            
+        # elif np.count_nonzero(original_board) > np.count_nonzero(self.board):
+        #         self.reward *= (np.count_nonzero(original_board) - np.count_nonzero(self.board))
+                
+        # if action == 0:
+        #     self.reward = -20
+        # if action == 3 and (0 not in self.board[-1]):
+        #      self.reward = -20
 
         if not np.array_equal(original_board, self.board):
             self._add_new_tile()
 
         done = not self._can_move()
+
+        if done:
+            self.reward = -1000
 
         return self.board, self.reward, done
 
@@ -105,14 +114,15 @@ class Game2048:
         max_val = np.max(board)
         top_five = np.sort(board, axis=None)[-5:]
         
-        # unique = np.count_nonzero(board[-1]) == len(np.unique(board[-1][np.nonzero(board[-1])]))
+        unique = np.count_nonzero(board[-1]) == len(np.unique(board[-1][np.nonzero(board[-1])]))
 
-        # if unique:
-        #     for val in top_five:
-        #         if val in board[-1]:
-        #             bonus += val
+        if unique:
+            for val in top_five:
+                if val in board[-1]:
+                    bonus += val
+
         if board[-1,0] == max_val:
-            bonus *= np.log2(max_val) + 5
+            bonus *= np.log2(max_val) * 3
 
         if max_val > self.max_tile:
             bonus *= np.log2(max_val)
