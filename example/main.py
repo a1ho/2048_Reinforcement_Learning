@@ -4,7 +4,6 @@ from env_2048 import Game2048Env
 
 env = Game2048Env()
 
-# Example of interacting with the environment
 observation = env.reset()
 env.render(mode='human')
 
