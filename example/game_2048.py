@@ -88,9 +88,9 @@ class Game2048:
         self.reward *= self.calculate_bonus(self.board, original_board)
 
         if action == 0:
-            self.reward *= -10
+            self.reward = -100
         if action == 3 and (0 not in self.board[-1]):
-            self.reward *= -0.5
+            self.reward -= 50
 
         if not np.array_equal(original_board, self.board):
             self._add_new_tile()
@@ -112,7 +112,7 @@ class Game2048:
         #         if val in board[-1]:
         #             bonus += val
         if board[-1,0] == max_val:
-            bonus *= np.log2(max_val) + 5
+            bonus *= np.log2(max_val) + 100
 
         if max_val > self.max_tile:
             bonus *= np.log2(max_val)
@@ -126,8 +126,6 @@ class Game2048:
 
         # if (board == 2).sum() >= 7:
         #     bonus -= (board == 2).sum()
-
-        
 
         return float(bonus)
 

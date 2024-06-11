@@ -51,29 +51,30 @@ policy_kwargs = dict(
     activation_fn=torch.nn.ReLU  # Activation function for the hidden layers
 )
 # Create the DQN model
-model = PPO(
+model = DQN(
     'MlpPolicy',
     env,
     policy_kwargs=policy_kwargs,
     verbose=1,
-    learning_rate=0.0003,
-    gae_lambda=0.95,
-    ent_coef=0.01,
-    clip_range=0.2,
-    n_epochs=10,
-    batch_size=64,
-    vf_coef=0.5
-    )
-    # learning_rate=0.0005,  # Lower learning rate
-    # buffer_size=100000,  # Larger buffer size
-    # learning_starts=1000,
-    # batch_size=64,  # Larger batch size
-    # target_update_interval=500,
-    # gamma=0.99,
-    # train_freq=(4, 'step'),
-    # exploration_fraction=0.5,
-    # exploration_initial_eps=1.0,
-    # exploration_final_eps=0.02,
+    # learning_rate=0.0003,
+    # gae_lambda=0.95,
+    # ent_coef=0.01,
+    # clip_range=0.2,
+    # n_epochs=10,
+    # batch_size=64,
+    # vf_coef=0.5
+    # )
+    learning_rate=0.0005,  # Lower learning rate
+    buffer_size=100000,  # Larger buffer size
+    learning_starts=1000,
+    batch_size=64,  # Larger batch size
+    target_update_interval=500,
+    gamma=0.99,
+    train_freq=(4, 'step'),
+    exploration_fraction=0.5,
+    exploration_initial_eps=1.0,
+    exploration_final_eps=0.02)
+
     # learning_rate=0.001, 
     # buffer_size=10000, 
     # learning_starts=1000, 
@@ -104,7 +105,7 @@ model = PPO(
 #     scores.append(env.game.score)
 # print(f'Average Score with Baseline Model: {np.mean(scores)}')
 
-model.learn(total_timesteps=500000, log_interval=100)
+model.learn(total_timesteps=1000000, log_interval=100)
 
 
 scores = []
