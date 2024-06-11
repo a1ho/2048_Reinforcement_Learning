@@ -14,10 +14,13 @@ class Game2048:
         self._add_new_tile()
 
     def _add_new_tile(self):
-        empty_cells = list(zip(*np.where(self.board == 0)))
+        empty_cells = [(i, j) for i in range(self.size) for j in range(self.size) if self.board[i, j]==0]
         if empty_cells:
             row, col = random.choice(empty_cells)
-            self.board[row][col] = 2 if random.random() < 0.9 else 4
+            if random.random() < 0.9:
+                self.board[row][col] = 2 
+            else:
+                self.board[row][col] = 4
 
     def _merge(self, row):
         non_zero = row[row != 0]
