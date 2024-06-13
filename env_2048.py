@@ -4,14 +4,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from game_2048 import Game2048
+from IPython.display import display, clear_output
 
 
 class Game2048Env(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
-    def __init__(self):
+    def __init__(self, rand = False):
         super(Game2048Env, self).__init__()
-        self.game = Game2048()
+        self.game = Game2048(rand)
         
         self.action_space = spaces.Discrete(4)  # Four possible actions: up, down, left, right
         self.observation_space = spaces.Box(low=0, high=2**16, shape=(4, 4), dtype=np.int64)
@@ -60,6 +61,7 @@ class Game2048Env(gym.Env):
         if mode == 'human':
             self.game.render()
         elif mode == 'rgb_array':
+            
             self.ax.clear()
             rgb_array = self.get_rgb_array()
             self.ax.imshow(rgb_array)
@@ -83,6 +85,10 @@ class Game2048Env(gym.Env):
 
             plt.draw()
             plt.pause(0.1)
+
+            clear_output(wait=True)
+            display(self.fig)
+            
             return rgb_array
 
     def get_rgb_array(self):

@@ -3,13 +3,14 @@ import random
 import time
 
 class Game2048:
-    def __init__(self):
+    def __init__(self, rand=False):
         self.size = 4
         self.board = np.zeros((self.size, self.size), dtype=int)
         self.score = 0
         self.n_moves = 0
         self.reward = 0
         self.max_tile = 2
+        self.rand = rand
         self._add_new_tile()
         self._add_new_tile()
 
@@ -54,7 +55,8 @@ class Game2048:
         original_board = np.copy(self.board)
         actions = set([1,2,3])
         found = False
-        while not found:
+
+        if self.rand:
 
             self.reward = 0
 
@@ -70,19 +72,36 @@ class Game2048:
             elif action == 3:  # Right
                 self.board = np.fliplr(self._move(np.fliplr(self.board)))
 
-            if np.array_equal(original_board, self.board):
-                self.board = original_board
-                if action != 0:
-                    actions.remove(int(action))
-                if actions:
-                    action = random.choice(list(actions))
-                elif not actions and action != 0:
-                    action = 0
+        else:
+            while not found:
+
+                self.reward = 0
+
+                if action == 0:  # Up
+                    self.board = self._move(self.board.T).T
+                        
+                elif action == 1:  # Down
+                    self.board = np.flipud(self._move(np.flipud(self.board).T).T)
+
+                elif action == 2:  # Left
+                    self.board = self._move(self.board)
+                
+                elif action == 3:  # Right
+                    self.board = np.fliplr(self._move(np.fliplr(self.board)))
+
+                if np.array_equal(original_board, self.board):
+                    self.board = original_board
+                    if action != 0:
+                        actions.remove(int(action))
+                    if actions:
+                        action = random.choice(list(actions))
+                    elif not actions and action != 0:
+                        action = 0
+                    else:
+                        found = True
+                        self.reward = 0
                 else:
                     found = True
-                    self.reward = 0
-            else:
-                found = True
 
         self.score += self.reward
         self.reward *= self.calculate_bonus(self.board, original_board)
@@ -127,6 +146,10 @@ class Game2048:
         if max_val > self.max_tile:
             bonus += np.log2(max_val)
             self.max_tile = max_val
+
+        nonzeros = np.nonzero(board[-1])
+        if all(booard[-1][nonzeros[i]] > board[-1][nonzeros[i+1]] for i in range(len(nonzeros) - 1)):
+            bonus += 2
 
         # if np.count_nonzero(original_board) > np.count_nonzero(board):
         #     bonus *= (np.count_nonzero(original_board) - np.count_nonzero(board))
